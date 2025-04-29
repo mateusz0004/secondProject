@@ -1,6 +1,6 @@
 public class Product {
     enum suplements{
-        BIALKO, CYTRULINA, KREATYNA, MAGNEZ, OMEGA, WITAMINAD3;
+        PROTEIN, CITRULINE, CREATINE, MAGNEZ, OMEGA, WITAMIND3;
 
         public String getSupplement(){
             String writing = this.name().toLowerCase();
