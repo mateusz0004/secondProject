@@ -13,45 +13,45 @@ public class Cart {
             return this.name().toLowerCase();
         }
     }
-
-    private static int id = 101; //// numer wózka
-    InventoryItem inventory;
+    private static int nextId = 101; // licznik dla wszystkich koszyków
+    private final int cartId;        // unikalne ID danego koszyka
+    private InventoryItem inventory;
     private List<Product> productsInCart = new ArrayList<>(); // lista produktów w koszyku
     private LocalDate currentDate; //// zmienna przechowująca date
     private typeOfCart type; //// czy wózek wirtualny czy zwykły
 
     public Cart(String type, InventoryItem inventory) {
-        id++;
+        this.cartId = nextId++;
         this.currentDate = LocalDate.now();
         this.type = typeOfCart.valueOf(type.toUpperCase());
         this.inventory = inventory;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder cartContents = new StringBuilder();
-        cartContents.append("Cart ID: ").append(id).append("\n");
-        cartContents.append("Date: ").append(currentDate).append("\n");
-        cartContents.append("Type: ").append(type).append("\n");
-        cartContents.append("Products in cart:\n");
-        Map<Product, Integer> listOfProducts = new HashMap<>();
-        String pom = " ";
+ @Override
+public String toString() {
+    StringBuilder cartContents = new StringBuilder();
+    cartContents.append("Cart ID: ").append(cartId).append("\n");
+    cartContents.append("Date: ").append(currentDate).append("\n");
+    cartContents.append("Type: ").append(type).append("\n");
+    cartContents.append("Products in cart:\n");
 
-        for (Product product : productsInCart) {
-            if(!product.getName().equals(pom)){
-                listOfProducts.computeIfAbsent(product, i -> 1);
-            }else{
-                listOfProducts.computeIfPresent(product, (p,i) -> i+1);
-            }
-                pom = product.getName();
-        }
-        for(Map.Entry<Product, Integer> lists: listOfProducts.entrySet()){
-            Product productInCart = lists.getKey();
-            Integer quantity = lists.getValue();
-            cartContents.append(productInCart.toString()).append(", Quantity: ").append(quantity).append("\n");
-        }
-        return cartContents.toString();
+    Map<Product, Integer> listOfProducts = new HashMap<>();
+
+    for (Product product : productsInCart) {
+        listOfProducts.merge(product, 1, Integer::sum);
     }
+
+    for (Map.Entry<Product, Integer> entry : listOfProducts.entrySet()) {
+        Product productInCart = entry.getKey();
+        Integer quantity = entry.getValue();
+        cartContents.append(productInCart.toString())
+                    .append(", Quantity: ")
+                    .append(quantity)
+                    .append("\n");
+    }
+
+    return cartContents.toString();
+}
 
     public void addItems(Product product, int quantity) { //// dodajemy X produktów do koszyka
         if (quantity == 1) {
@@ -76,20 +76,14 @@ public class Cart {
         }
     }
 
-    public void addListOfItems(List<Product> lists, InventoryItem inventory) { //// dodajemy liste przedmiotów po prostu do koszyka
-        for (int i = 0; i < lists.size()    ; i++) {
-            addSingleItemToCart(lists.get(i));
-        }
-    }
     public void addSingleItemToCart(Product product){
         productsInCart.add(product);
         inventory.reserveItem(1);
     }
-    public void addListOfItems(Product product, int quantity, InventoryItem inventory) { //// dodajemy liste przedmiotów po prostu do koszyka
-        List<Product>lists = new ArrayList<>();
-        for(int i=0; i<quantity; i++){
-            addSingleItemToCart(product);
-        }
+
+public void addListOfItems(List<Product> lists) {
+    for (Product product : lists) {
+        addSingleItemToCart(product);
     }
 }
 
